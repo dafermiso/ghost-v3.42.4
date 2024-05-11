@@ -5,13 +5,9 @@
     "host": "0.0.0.0"
   },
   "database": {
-    "client": "mysql",
+    "client": "sqlite3",
     "connection": {
-      "host": "mysql-s2u1",
-      "port": 3306,
-      "user": "mysql",
-      "password": "39vQ6CTN/5fkeaHjX5v/2YlEDnKdt9W9/WGIsea8HbY=",
-      "database": "ghostdb"
+      "filename": "/var/lib/ghost/content/data/ghost.db"
     }
   },
   "mail": {
