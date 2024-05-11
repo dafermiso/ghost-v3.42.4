@@ -1,8 +1,51 @@
+version: '3.1'
+
 services:
-- type: web
-  name: ghost
-  env: docker
-  disk:
-    name: ghost
-    mountPath: /var/lib/ghost/content
-    sizeGB: 10 #Feel free to change this to suit your needs.
+
+  ghost:
+    image: ghost:5-alpine
+    restart: unless-stopped
+    environment:
+      # see https://ghost.org/docs/config/#configuration-options
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: root
+      database__connection__password: SOME_PRIVATE_ROOT_PASSWORD
+      database__connection__database: ghost
+      # this url value is just an example, and is likely wrong for your environment!
+      url: https://blog.example.org
+    volumes:
+      - ./data/ghost:/var/lib/ghost/content
+    networks:
+      default:
+      traefik:
+        aliases:
+         - blog-example-org
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.blog-example-org.rule=Host(`blog.example.org`)
+      - traefik.http.services.blog-example-org.loadbalancer.server.port=2368
+      - traefik.http.routers.blog-example-org.entrypoints=web-secure
+      - traefik.http.routers.blog-example-org.tls=true
+      - traefik.http.routers.blog-example-org.tls.certResolver=default
+      - traefik.http.routers.blog-example-org.service=blog-example-org
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    networks:
+     - default
+    environment:
+      MYSQL_ROOT_PASSWORD: SOME_PRIVATE_ROOT_PASSWORD
+      MYSQL_DATABASE: ghost
+    volumes:
+      - ./data/db:/var/lib/mysql
+
+
+networks:
+  traefik:
+    external: true
+  default:
+    external: false
+
